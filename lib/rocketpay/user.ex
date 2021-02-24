@@ -22,7 +22,6 @@ defmodule Rocketpay.User do
   def changeset(params) do
     %__MODULE__{}
     |> cast(params, @required_params)
-    |> IO.inspect()
     |> validate_required(@required_params)
     |> validate_length(:password, min: 6)
     |> validate_number(:age, greater_than_or_equal_to: 18)
