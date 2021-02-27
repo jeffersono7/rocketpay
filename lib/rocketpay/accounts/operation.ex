@@ -1,12 +1,16 @@
 defmodule Rocketpay.Accounts.Operation do
   alias Ecto.Multi
 
-  alias Rocketpay.{Account, Repo}
+  alias Rocketpay.Account
 
   def call(%{"id" => id, "value" => value}, operation) do
+    account_operation_name = account_operation_name(operation)
+
     Multi.new()
-    |> Multi.run(:account, fn repo, _changes -> get_account(repo, id) end)
-    |> Multi.run(:update_balance, fn repo, %{account: account} ->
+    |> Multi.run(account_operation_name, fn repo, _changes -> get_account(repo, id) end)
+    |> Multi.run(operation, fn repo, changes ->
+      account = Map.get(changes, account_operation_name)
+
       update_balance(repo, account, value, operation)
     end)
   end
@@ -46,5 +50,9 @@ defmodule Rocketpay.Accounts.Operation do
     account
     |> Account.changeset(params)
     |> repo.update()
+  end
+
+  defp account_operation_name(operation) do
+    "account_#{operation}" |> String.to_atom()
   end
 end
